@@ -16,6 +16,7 @@ jobs:
     strategy:
       matrix:
         compiler: [gcc, clang]
+        sysklogd: [--with-syslogp, --without-syslogp]
       fail-fast: false
     env:
       MAKEFLAGS: -j3
@@ -33,7 +34,7 @@ jobs:
       - name: Configure ...
         run: |
           ./autogen.sh
-          ./configure --prefix=
+          ./configure --prefix= ${{ matrix.sysklogd }}
       - name: Build ...
         run: |
           make V=1

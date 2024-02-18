@@ -23,7 +23,7 @@ jobs:
       - name: Configure ...
         run: |
           ./autogen.sh
-          ./configure
+          ./configure --with-syslogp
       - name: Build release ...
         run: |
           make release
