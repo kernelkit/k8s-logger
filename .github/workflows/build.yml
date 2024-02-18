@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     # Verify we can build on latest Ubuntu with both gcc and clang
-    name: ${{ matrix.compiler }}
+    name: Build ${{ matrix.sysklogd }} using ${{ matrix.compiler }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -31,7 +31,7 @@ jobs:
           (cd sysklogd-2.5.2/ && ./configure && make && sudo make install-strip)
           sudo ldconfig
       - uses: actions/checkout@v4
-      - name: Configure ...
+      - name: Configure ${{ matrix.sysklogd }} ...
         run: |
           ./autogen.sh
           ./configure --prefix= ${{ matrix.sysklogd }}
