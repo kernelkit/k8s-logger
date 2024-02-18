@@ -2,19 +2,18 @@
 #include "config.h"
 
 #define SYSLOG_NAMES
-#include <stddef.h>
-#include <syslog/syslog.h>	/* libsyslog from sysklogd project */
+#include "log.h"
 #include <libite/lite.h>
 
 #include <err.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include "log.h"
 
 struct syslog_data sd = SYSLOG_DATA_INIT;
+extern char *ident;
 
 /* Dumpster dive in container for process ID */
-static void dumpster_dive(const char *ident, int *log_pid)
+static void dumpster_dive(int *log_pid)
 {
 	char buf[512];
 	char *docker;
@@ -71,7 +70,7 @@ void logit(int severity, const char *fmt, ...)
 	va_list ap;
 
 	if (sd.log_pid == -1)
-		dumpster_dive(ident, &sd.log_pid);
+		dumpster_dive(&sd.log_pid);
 
 	va_start(ap, fmt);
 	vsyslogp_r(severity, &sd, msgid, NULL, fmt, ap);

@@ -3,11 +3,16 @@
 
 #ifdef HAVE_SYSLOGP
 
-void log_open  (const char *ident, int option, int facility);
-void log_close (void);
-void logit     (int severity, const char *fmt, ...);
+#include <stddef.h>
+#include <syslog/syslog.h>	/* libsyslog from sysklogd project */
+
+void log_open     (const char *ident, int option, int facility);
+void log_close    (void);
+void logit        (int severity, const char *fmt, ...);
+int  log_facility (const char *arg);
 
 #else
+
 #define SYSLOG_NAMES
 #include <err.h>
 #include <string.h>

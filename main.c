@@ -12,6 +12,9 @@
 
 #define TOKEN(ptr) if ((ptr = token(ptr)) == NULL) continue
 
+char *ident = NULL;
+
+
 static char *token(char *ptr)
 {
 	if (!ptr)
@@ -68,7 +71,6 @@ int main(int argc, char *argv[])
 {
 	char msg[1024] = { 0 }, buf[512];
 	int partial, facility = LOG_USER;
-	char *ident = NULL;
 	int daemonize = 1;
 	FILE *fp;
 	int c;
