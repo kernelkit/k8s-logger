@@ -20,3 +20,30 @@ PKG_CHECK_MODULES([lite], [libite >= 2.4.0])
 
 AM_CONDITIONAL(SYSLOGP, [test "x$with_syslogp" = "xyes"])
 AC_OUTPUT
+
+cat <<EOF
+
+------------------ Summary ------------------
+ $PACKAGE_NAME version $PACKAGE_VERSION
+  Prefix................: $prefix
+  Exec prefix...........: $eprefix
+  Sysconfdir............: `eval echo $sysconfdir`
+  Localstatedir.........: `eval echo $localstatedir`
+  Default fstab.........: `eval echo $fstab`
+  System environment....: ${sysconfig_path:-${sysconfig}}
+  C Compiler............: $CC $CFLAGS $CPPFLAGS $LDFLAGS $LIBS
+  Linker................: $LD $LLDP_LDFLAGS $LLDP_BIN_LDFLAGS $LDFLAGS $LIBS
+
+Optional features:
+  Use syslogp() API.....: $with_syslogp
+
+------------- Compiler version --------------
+$($CC --version || true)
+-------------- Linker version ---------------
+$($LD --version || true)
+---------------------------------------------
+
+Check the above options and compile with:
+ ${MAKE-make}
+
+EOF
