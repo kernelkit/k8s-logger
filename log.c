@@ -8,6 +8,7 @@
 #include <err.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include "log.h"
 
 struct syslog_data log = SYSLOG_DATA_INIT;
 
