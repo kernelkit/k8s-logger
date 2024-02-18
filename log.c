@@ -2,6 +2,7 @@
 #include "config.h"
 
 #define SYSLOG_NAMES
+#include <stddef.h>
 #include <syslog/syslog.h>	/* libsyslog from sysklogd project */
 #include <libite/lite.h>
 
@@ -10,7 +11,7 @@
 #include <stdlib.h>
 #include "log.h"
 
-struct syslog_data log = SYSLOG_DATA_INIT;
+struct syslog_data sd = SYSLOG_DATA_INIT;
 
 /* Dumpster dive in container for process ID */
 static void dumpster_dive(const char *ident, int *log_pid)
@@ -57,23 +58,23 @@ err:
 
 void log_open(const char *ident, int option, int facility)
 {
-	openlog_r(ident, LOG_PID, facility, &log);
+	openlog_r(ident, LOG_PID, facility, &sd);
 }
 
 void log_close(void)
 {
-	closelog_r(&log);
+	closelog_r(&sd);
 }
 
 void logit(int severity, const char *fmt, ...)
 {
 	va_list ap;
 
-	if (log.log_pid == -1)
-		dumpster_dive(ident, &log.log_pid);
+	if (sd.log_pid == -1)
+		dumpster_dive(ident, &sd.log_pid);
 
 	va_start(ap, fmt);
-	vsyslogp_r(severity, &log, msgid, NULL, fmt, ap);
+	vsyslogp_r(severity, &sd, msgid, NULL, fmt, ap);
 	va_end(ap);
 }
 
