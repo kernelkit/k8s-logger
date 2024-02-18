@@ -73,7 +73,7 @@ void logit(int severity, const char *fmt, ...)
 		dumpster_dive(&sd.log_pid);
 
 	va_start(ap, fmt);
-	vsyslogp_r(severity, &sd, msgid, NULL, fmt, ap);
+	vsyslogp_r(severity, &sd, NULL, NULL, fmt, ap);
 	va_end(ap);
 }
 
