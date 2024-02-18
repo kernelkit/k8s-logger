@@ -3,8 +3,14 @@ DISTCLEANFILES	    = *~ DEADJOE semantic.cache *.gdb *.elf core core.* *.d
 dist_doc_DATA	    = README.md LICENSE
 
 bin_PROGRAMS	    = k8s-logger
-k8s_logger_SOURCES  = main.c
-k8s_logger_CPPFLAGS = -DSYSLOG_NAMES -D_DEFAULT_SOURCE -D_BSD_SOURCE
+k8s_logger_SOURCES  = main.c log.h
+k8s_logger_CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE
+k8s_logger_CFLAGS   = $(syslog_CFLAGS) $(lite_CFLAGS)
+k8s_logger_LDADD    = $(syslog_LIBS)   $(lite_LIBS)
+
+if SYSLOGP
+k8s_logger_SOURCES += log.c
+endif
 
 release: distcheck
 	@for file in $(DIST_ARCHIVES); do		\

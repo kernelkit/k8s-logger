@@ -6,8 +6,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <syslog.h>
 #include <unistd.h>
+#include <libite/lite.h>
+#include "log.h"
 
 #define TOKEN(ptr) if ((ptr = token(ptr)) == NULL) continue
 
@@ -23,18 +24,6 @@ static char *token(char *ptr)
 	return ++ptr;
 }
 
-static int parse_facility(const char *arg)
-{
-	for (size_t i = 0; facilitynames[i].c_name; i++) {
-		if (strcmp(facilitynames[i].c_name, arg))
-			continue;
-
-		return facilitynames[i].c_val;
-	}
-
-	return LOG_USER;
-}
-
 static int usage(const char *arg0, int code)
 {
 	printf("Usage:\n"
@@ -45,6 +34,7 @@ static int usage(const char *arg0, int code)
 	       "  -h           Display this help text and exit\n"
 	       "  -i ident     Log identity, e.g., container name\n"
 	       "  -n           Run in foreground, do not daemonize\n"
+	       "  -v           Dispaly program version and exit\n"
 	       "\n"
 	       "Arguments:\n"
 	       "  FILE         k8s-file log pipe to read from\n"
@@ -57,9 +47,6 @@ static int version(int rc)
 {
 	puts(PACKAGE_STRING);
 	printf("Bug report address: %-40s\n", PACKAGE_BUGREPORT);
-#ifdef PACKAGE_URL
-	printf("Project homepage: %s\n", PACKAGE_URL);
-#endif
 
 	return rc;
 }
@@ -79,7 +66,7 @@ static int version(int rc)
  */
 int main(int argc, char *argv[])
 {
-	char log[1024] = { 0 }, buf[512];
+	char msg[1024] = { 0 }, buf[512];
 	int partial, facility = LOG_USER;
 	char *ident = NULL;
 	int daemonize = 1;
@@ -89,7 +76,7 @@ int main(int argc, char *argv[])
 	while ((c = getopt(argc, argv, "f:hi:nv")) != EOF) {
 		switch (c) {
 		case 'f':
-			facility = parse_facility(optarg);
+			facility = log_facility(optarg);
 			break;
 		case 'h':
 			return usage(argv[0], 0);
@@ -124,10 +111,10 @@ int main(int argc, char *argv[])
 			warn("failed changing to root directoy");
 	}
 
-	openlog(ident, 0, facility);
+	log_open(ident, 0, facility);
 	while (fgets(buf, sizeof(buf), fp)) {
 		int priority = LOG_NOTICE;
-		char *ptr = buf;
+		char *ptr = chomp(buf);
 
 		/* skip time, we're forwarding to syslog anyway */
 		TOKEN(ptr);
@@ -143,16 +130,17 @@ int main(int argc, char *argv[])
 		/* finally, the log message */
 		TOKEN(ptr);
 		if (partial) {
-			strcat(log, ptr);
+			strlcat(msg, ptr, sizeof(msg));
 			continue;
 		}
 
-		strcat(log, ptr);
-		syslog(priority, "%s", log);
+		strlcat(msg, ptr, sizeof(msg));
+		logit(priority, "%s", msg);
 
 		/* done prepare for next segment */
-		*log = 0;
+		*msg = 0;
 	}
+	log_close();
 	fclose(fp);
 
 	return 0;
