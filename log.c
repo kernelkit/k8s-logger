@@ -1,11 +1,13 @@
 /* SPDX-License-Identifier: MIT */
 #include "config.h"
 
+#define SYSLOG_NAMES
+#include <syslog/syslog.h>	/* libsyslog from sysklogd project */
+#include <libite/lite.h>
+
 #include <err.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <syslog/syslog.h>	/* libsyslog from sysklogd project */
-#include <libite/lite.h>
 
 struct syslog_data log = SYSLOG_DATA_INIT;
 
