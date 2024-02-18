@@ -30,6 +30,7 @@ jobs:
           tar xf sysklogd-2.5.2.tar.gz
           (cd sysklogd-2.5.2/ && ./configure && make && sudo make install-strip)
           sudo ldconfig
+          cat /usr/local/include/syslog/syslog.h
       - uses: actions/checkout@v4
       - name: Configure ${{ matrix.sysklogd }} ...
         run: |
