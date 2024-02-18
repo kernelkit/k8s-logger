@@ -1,3 +1,22 @@
+# Backup files
+DEADJOE
+*.bak
+*~
+
+# Generated autotools
+.aux/
+.deps/
+autom4te.cache/
+Makefile
+Makefile.in
+aclocal.m4
+config.h.in
+config.h
+config.log
+config.status
+configure
+stamp-h1
+
 # Prerequisites
 *.d
 
@@ -35,6 +54,7 @@
 *.i*86
 *.x86_64
 *.hex
+k8s-logger
 
 # Debug files
 *.dSYM/
