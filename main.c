@@ -71,12 +71,15 @@ int main(int argc, char *argv[])
 {
 	char msg[1024] = { 0 }, buf[512], *pidfn = NULL;
 	int partial, facility = LOG_USER;
-	int daemonize = 1;
+	int daemonize = 1, create = 0;
 	FILE *fp;
 	int c;
 
-	while ((c = getopt(argc, argv, "f:hi:nv")) != EOF) {
+	while ((c = getopt(argc, argv, "cf:hi:nv")) != EOF) {
 		switch (c) {
+		case 'c':
+			create = 1;
+			break;
 		case 'f':
 			facility = log_facility(optarg);
 			break;
@@ -110,6 +113,13 @@ int main(int argc, char *argv[])
 	}
 
 	log_open(ident, 0, facility);
+
+	if (create) {
+		if (mkfifo(fn, 0600) && errno != EEXIST) {
+			syslog(LOG_ERR, "failed creating FIFO %s", fn);
+			exit(1);
+		}
+	}
 
 	if (ident) {
 		snprintf(buf, sizeof(buf), "/run/%s-%s.pid", PACKAGE_NAME, ident);
