@@ -81,7 +81,7 @@ static int version(int rc)
  */
 int main(int argc, char *argv[])
 {
-	char msg[1024] = { 0 }, buf[512], *pidfn = NULL;
+	char msg[1024] = { 0 }, buf[512], *fn, *pidfn = NULL;
 	int partial, facility = LOG_USER;
 	int daemonize = 1, create = 0;
 	FILE *fp;
@@ -97,11 +97,11 @@ int main(int argc, char *argv[])
 			break;
 		case 'h':
 			return usage(argv[0], 0);
-		case 'n':
-			daemonize = 0;
-			break;
 		case 'i':
 			ident = optarg;
+			break;
+		case 'n':
+			daemonize = 0;
 			break;
 		case 'v':
 			return version(0);
@@ -112,6 +112,7 @@ int main(int argc, char *argv[])
 
 	if (optind >= argc)
 		errx(1, "Missing argument, fifo to read from.");
+	fn = argv[optind];
 
 	if (daemonize) {
 		if (daemon(0, 0))
@@ -142,10 +143,10 @@ int main(int argc, char *argv[])
 	if (pidfile(pidfn))
 		logit(LOG_ERR, "failed creating pidfile: %s", strerror(errno));
 
-	fp = fopen(argv[optind], "r");
+	fp = fopen(fn, "r");
 	if (!fp) {
-		logit(LOG_ERR, "failed opening %sd: %s", argv[optind], strerror(errno));
-		err(1, "failed opening %s", argv[optind]);
+		logit(LOG_ERR, "failed opening %sd: %s", fn, strerror(errno));
+		err(1, "failed opening %s", fn);
 	}
 
 	while (running && fgets(buf, sizeof(buf), fp)) {
@@ -176,6 +177,8 @@ int main(int argc, char *argv[])
 		/* done prepare for next segment */
 		*msg = 0;
 	}
+
+	logit(LOG_NOTICE, "shutting down.");
 	log_close();
 	fclose(fp);
 
