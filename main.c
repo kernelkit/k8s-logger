@@ -13,7 +13,7 @@
 #define TOKEN(ptr) if ((ptr = token(ptr)) == NULL) continue
 
 char *ident = NULL;
-
+int running = 1;
 
 static char *token(char *ptr)
 {
@@ -25,6 +25,18 @@ static char *token(char *ptr)
 		return NULL;
 
 	return ++ptr;
+}
+
+static void sig(int signo)
+{
+	syslog(LOG_NOTICE, "got signal %d", signo);
+	running = 0;
+}
+
+static void sig_init(void)
+{
+	signal(SIGTERM, sig);
+	signal(SIGHUP, sig);
 }
 
 static int usage(const char *arg0, int code)
@@ -112,6 +124,7 @@ int main(int argc, char *argv[])
 			warn("failed changing to root directoy");
 	}
 
+	sig_init();
 	log_open(ident, 0, facility);
 
 	if (create) {
@@ -135,7 +148,7 @@ int main(int argc, char *argv[])
 		err(1, "failed opening %s", argv[optind]);
 	}
 
-	while (fgets(buf, sizeof(buf), fp)) {
+	while (running && fgets(buf, sizeof(buf), fp)) {
 		int priority = LOG_NOTICE;
 		char *ptr = chomp(buf);
 
