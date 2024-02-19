@@ -4,7 +4,15 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
-[v1.1][] - 2024-02-18
+[v1.2][] - 2024-02-19
+---------------------
+
+### Changes
+ - New command line option `-c` to create FIFO at startup
+ - Add support for signals
+
+
+[v1.1][] - 2024-02-19
 ---------------------
 
 ### Changes

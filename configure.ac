@@ -1,4 +1,4 @@
-AC_INIT([k8s-logger],[1.1],[https://github.com/kernelkit/k8s-logger/issues])
+AC_INIT([k8s-logger],[1.2],[https://github.com/kernelkit/k8s-logger/issues])
 
 AC_CONFIG_AUX_DIR(.aux)
 AM_INIT_AUTOMAKE([1.11 foreign])
