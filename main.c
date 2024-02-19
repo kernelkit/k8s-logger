@@ -69,7 +69,7 @@ static int version(int rc)
  */
 int main(int argc, char *argv[])
 {
-	char msg[1024] = { 0 }, buf[512];
+	char msg[1024] = { 0 }, buf[512], *pidfn = NULL;
 	int partial, facility = LOG_USER;
 	int daemonize = 1;
 	FILE *fp;
@@ -110,6 +110,14 @@ int main(int argc, char *argv[])
 	}
 
 	log_open(ident, 0, facility);
+
+	if (ident) {
+		snprintf(buf, sizeof(buf), "/run/%s-%s.pid", PACKAGE_NAME, ident);
+		pidfn = buf;
+	}
+	logit(LOG_ERR, "creating pidfile %s", pidfn ?: "<k8s-logger>");
+	if (pidfile(pidfn))
+		logit(LOG_ERR, "failed creating pidfile: %s", strerror(errno));
 
 	fp = fopen(argv[optind], "r");
 	if (!fp) {
