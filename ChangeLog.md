@@ -4,6 +4,16 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
+[v1.1][] - 2024-02-18
+---------------------
+
+### Changes
+ - Create `/run/k8s-logger-$ident.pid` for syncing container start
+
+### Fixes
+ - Call `fopen()` of fifo *after* daemonzing to prevent blocking
+
+
 [v1.0][] - 2024-02-18
 ---------------------
 
