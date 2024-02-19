@@ -98,10 +98,6 @@ int main(int argc, char *argv[])
 	if (optind >= argc)
 		errx(1, "Missing argument, fifo to read from.");
 
-	fp = fopen(argv[optind], "r");
-	if (!fp)
-		err(1, "failed opening %s", argv[optind]);
-
 	if (daemonize) {
 		if (daemon(0, 0))
 			err(1, "failed daemonizing");
@@ -114,6 +110,13 @@ int main(int argc, char *argv[])
 	}
 
 	log_open(ident, 0, facility);
+
+	fp = fopen(argv[optind], "r");
+	if (!fp) {
+		logit(LOG_ERR, "failed opening %sd: %s", argv[optind], strerror(errno));
+		err(1, "failed opening %s", argv[optind]);
+	}
+
 	while (fgets(buf, sizeof(buf), fp)) {
 		int priority = LOG_NOTICE;
 		char *ptr = chomp(buf);
