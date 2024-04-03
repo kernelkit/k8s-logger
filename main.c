@@ -3,6 +3,7 @@
 
 #include <err.h>
 #include <getopt.h>
+#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -82,10 +83,10 @@ static int version(int rc)
 int main(int argc, char *argv[])
 {
 	char msg[1024] = { 0 }, buf[512], *fn, *pidfn = NULL;
-	int partial, facility = LOG_USER;
-	int daemonize = 1, create = 0;
+	int create = 0, daemonize = 1, facility = LOG_USER;
+	int partial, fd, flags, c;
+	struct pollfd pfd;
 	FILE *fp;
-	int c;
 
 	while ((c = getopt(argc, argv, "cf:hi:nv")) != EOF) {
 		switch (c) {
@@ -149,9 +150,24 @@ int main(int argc, char *argv[])
 		err(1, "failed opening %s", fn);
 	}
 
-	while (running && fgets(buf, sizeof(buf), fp)) {
+	fd = fileno(fp);
+	flags = fcntl(fd, F_GETFL, 0);
+	if (flags == -1 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+		logit(LOG_ERR, "failed setting pipe fd non-blocking");
+		err(1, "failed setting pipe fd non-blocking");
+	}
+
+	pfd.fd = fd;
+	pfd.events = POLLIN;
+	pfd.revents = 0;
+
+	while (running && poll(&pfd, 1, -1) > 0) {
 		int priority = LOG_NOTICE;
-		char *ptr = chomp(buf);
+		char *ptr;
+
+		if (!fgets(buf, sizeof(buf), fp))
+			continue;
+		ptr = chomp(buf);
 
 		/* skip time, we're forwarding to syslog anyway */
 		TOKEN(ptr);
