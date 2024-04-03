@@ -4,6 +4,18 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
+[v1.3][] - 2024-04-03
+---------------------
+
+### Changes
+ - If started with `-c` and FIFO already exists, it is first removed
+ - If started with `-c` the FIFO is removed at program exit
+
+### Fixes
+ - Change from blocking `fgets()` to `poll()` to respond to signals.
+   This means releases prior to this did not exit on SIGTERM
+
+
 [v1.2][] - 2024-02-19
 ---------------------
 
@@ -34,3 +46,7 @@ logging container main PID.
 [RFC3164]:  https://datatracker.ietf.org/doc/html/rfc3164
 [RFC5424]:  https://datatracker.ietf.org/doc/html/rfc5424
 [sysklogd]: https://github.com/troglobit/sysklogd
+
+[v1.3]: https://github.com/kernelkit/k8s-logger/compare/v1.2...v1.3
+[v1.2]: https://github.com/kernelkit/k8s-logger/compare/v1.1...v1.2
+[v1.1]: https://github.com/kernelkit/k8s-logger/compare/v1.0...v1.1
