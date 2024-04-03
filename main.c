@@ -130,6 +130,10 @@ int main(int argc, char *argv[])
 	log_open(ident, 0, facility);
 
 	if (create) {
+		/* our responsibilty to create, so remove if exists already */
+		if (fexist(fn))
+			remove(fn);
+
 		if (mkfifo(fn, 0600) && errno != EEXIST) {
 			syslog(LOG_ERR, "failed creating FIFO %s", fn);
 			exit(1);
@@ -197,6 +201,8 @@ int main(int argc, char *argv[])
 	logit(LOG_NOTICE, "shutting down.");
 	log_close();
 	fclose(fp);
+	if (create)
+		remove(fn);
 
 	return 0;
 }
