@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 {
 	char msg[1024] = { 0 }, buf[512], *fn, *pidfn = NULL;
 	int create = 0, daemonize = 1, facility = LOG_USER;
-	int partial, fd, flags, c, opts = LOG_PID;
+	int partial, fd, c, opts = LOG_PID;
 	struct pollfd pfd;
 	FILE *fp;
 
@@ -157,17 +157,20 @@ int main(int argc, char *argv[])
 	if (pidfile(pidfn))
 		logit(LOG_ERR, "failed creating pidfile: %s", strerror(errno));
 
-	fp = fopen(fn, "r");
-	if (!fp) {
+reopen:
+	logit(LOG_INFO, "opening fifo %s", fn);
+	fd = open(fn, O_RDONLY | O_NONBLOCK);
+	if (fd == -1) {
 		logit(LOG_ERR, "failed opening %sd: %s", fn, strerror(errno));
 		err(1, "failed opening %s", fn);
 	}
 
-	fd = fileno(fp);
-	flags = fcntl(fd, F_GETFL, 0);
-	if (flags == -1 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
-		logit(LOG_ERR, "failed setting pipe fd non-blocking");
-		err(1, "failed setting pipe fd non-blocking");
+	fp = fdopen(fd, "r");
+	if (!fp) {
+		logit(LOG_ERR, "failed opening fifo stream: %s", strerror(errno));
+		close(fd);
+		log_close();
+		exit(1);
 	}
 
 	pfd.fd = fd;
@@ -178,6 +181,11 @@ int main(int argc, char *argv[])
 	while (running && poll(&pfd, 1, -1) > 0) {
 		int priority = LOG_NOTICE;
 		char *ptr;
+
+		if (pfd.revents & POLLHUP) {
+			fclose(fp);
+			goto reopen;
+		}
 
 		if (!fgets(buf, sizeof(buf), fp))
 			continue;
