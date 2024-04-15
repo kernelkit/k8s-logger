@@ -47,6 +47,7 @@ static int usage(const char *arg0, int code)
 	       "\n"
 	       "Options:\n"
 	       "  -c           Create (and remove) FIFO at startup\n"
+	       "  -d           Debug mode\n"
 	       "  -f facilty   Log facility name, see syslog.h\n"
 	       "  -h           Display this help text and exit\n"
 	       "  -i ident     Log identity, e.g., container name\n"
@@ -85,14 +86,17 @@ int main(int argc, char *argv[])
 {
 	char msg[1024] = { 0 }, buf[512], *fn, *pidfn = NULL;
 	int create = 0, daemonize = 1, facility = LOG_USER;
-	int partial, fd, flags, c;
+	int partial, fd, flags, c, opts = LOG_PID;
 	struct pollfd pfd;
 	FILE *fp;
 
-	while ((c = getopt(argc, argv, "cf:hi:nv")) != EOF) {
+	while ((c = getopt(argc, argv, "cdf:hi:nv")) != EOF) {
 		switch (c) {
 		case 'c':
 			create = 1;
+			break;
+		case 'd':
+			opts |= LOG_PERROR;
 			break;
 		case 'f':
 			facility = log_facility(optarg);
@@ -122,13 +126,12 @@ int main(int argc, char *argv[])
 	} else {
 		close(STDIN_FILENO);
 		close(STDOUT_FILENO);
-		close(STDERR_FILENO);
 		if (chdir("/"))
 			warn("failed changing to root directoy");
 	}
 
 	sig_init();
-	log_open(ident, 0, facility);
+	log_open(ident, opts, facility);
 
 	if (create) {
 		/* our responsibilty to create, so remove if exists already */
@@ -145,7 +148,8 @@ int main(int argc, char *argv[])
 		snprintf(buf, sizeof(buf), "/run/%s-%s.pid", PACKAGE_NAME, ident);
 		pidfn = buf;
 	}
-	logit(LOG_ERR, "creating pidfile %s", pidfn ?: "<k8s-logger>");
+
+	logit(LOG_INFO, "creating pidfile %s", pidfn ?: "<k8s-logger>");
 	if (pidfile(pidfn))
 		logit(LOG_ERR, "failed creating pidfile: %s", strerror(errno));
 
@@ -166,6 +170,7 @@ int main(int argc, char *argv[])
 	pfd.events = POLLIN;
 	pfd.revents = 0;
 
+	logit(LOG_INFO, "entering poll loop ...");
 	while (running && poll(&pfd, 1, -1) > 0) {
 		int priority = LOG_NOTICE;
 		char *ptr;

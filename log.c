@@ -57,7 +57,7 @@ err:
 
 void log_open(const char *ident, int option, int facility)
 {
-	openlog_r(ident, LOG_PID, facility, &sd);
+	openlog_r(ident, option, facility, &sd);
 }
 
 void log_close(void)
