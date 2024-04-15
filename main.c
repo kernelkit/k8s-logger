@@ -52,6 +52,7 @@ static int usage(const char *arg0, int code)
 	       "  -h           Display this help text and exit\n"
 	       "  -i ident     Log identity, e.g., container name\n"
 	       "  -n           Run in foreground, do not daemonize\n"
+	       "  -p pidfile   Alternative PID file, default /run/$ident.pid"
 	       "  -v           Dispaly program version and exit\n"
 	       "\n"
 	       "Arguments:\n"
@@ -90,7 +91,7 @@ int main(int argc, char *argv[])
 	struct pollfd pfd;
 	FILE *fp;
 
-	while ((c = getopt(argc, argv, "cdf:hi:nv")) != EOF) {
+	while ((c = getopt(argc, argv, "cdf:hi:np:v")) != EOF) {
 		switch (c) {
 		case 'c':
 			create = 1;
@@ -108,6 +109,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'n':
 			daemonize = 0;
+			break;
+		case 'p':
+			pidfn = optarg;
 			break;
 		case 'v':
 			return version(0);
@@ -144,7 +148,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (ident) {
+	if (ident && !pidfn) {
 		snprintf(buf, sizeof(buf), "/run/%s-%s.pid", PACKAGE_NAME, ident);
 		pidfn = buf;
 	}
