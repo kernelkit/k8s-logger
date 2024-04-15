@@ -4,6 +4,20 @@ Change Log
 All notable changes to the project are documented in this file.
 
 
+[v1.4][] - 2024-04-15
+---------------------
+
+### Changes
+ - Update usage with new option, `-c`
+ - Add debug option, `-d` to log to `stderr` as well
+ - Add `-p file.pid` to allow overriding default PID file
+
+### Fixes
+ - Close and reopen FIFO on `POLLHUP`, i.e., when the other end
+   closes its file descriptor.  This fixes a 100% CPU load issue
+   seen in Infix when stopping containers
+
+
 [v1.3][] - 2024-04-03
 ---------------------
 
