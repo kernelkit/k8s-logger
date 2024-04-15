@@ -46,6 +46,7 @@ static int usage(const char *arg0, int code)
 	       "  %s [OPTIONS] FILE\n"
 	       "\n"
 	       "Options:\n"
+	       "  -c           Create (and remove) FIFO at startup\n"
 	       "  -f facilty   Log facility name, see syslog.h\n"
 	       "  -h           Display this help text and exit\n"
 	       "  -i ident     Log identity, e.g., container name\n"
